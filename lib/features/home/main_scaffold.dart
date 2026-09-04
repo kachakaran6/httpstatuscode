@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/routes.dart';
 import '../../data/repositories/status_repository.dart';
 import '../../services/local_storage_service.dart';
 import '../bookmarks/bookmarks_screen.dart';

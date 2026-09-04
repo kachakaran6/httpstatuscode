@@ -138,7 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     if (_results.isEmpty) {
-      return EmptyStateWidget(
+      return const EmptyStateWidget(
         icon: Icons.search_off_rounded,
         title: 'No results found',
         subtitle: 'Try searching for "404", "Not Found", or "timeout".',
