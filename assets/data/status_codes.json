@@ -1,0 +1,1431 @@
+{
+  "categories": [
+    {
+      "id": "cat_1xx",
+      "title": "1xx Informational",
+      "color": "#4CAF50",
+      "description": "Request received, continuing process.",
+      "codes": [
+        {
+          "id": "code_100",
+          "code": 100,
+          "title": "Continue",
+          "short_description": "Request received, continue sending the rest.",
+          "description": "The server has received the request headers and the client should proceed to send the request body. This is used to avoid sending a large request body before the server checks if the request is valid.",
+          "when_to_use": [
+            "Uploading a large file",
+            "Client wants server approval before sending body",
+            "PUT requests with large payloads"
+          ],
+          "example_response": {
+            "status": 100,
+            "message": "Continue"
+          },
+          "best_practice": "Always check for 100-continue expectation headers before sending large payloads."
+        },
+        {
+          "id": "code_101",
+          "code": 101,
+          "title": "Switching Protocols",
+          "short_description": "Server is switching protocols as requested.",
+          "description": "The server understands and is willing to comply with the client's request to switch protocols. The Upgrade header field in the response indicates the protocol(s) to which the server is switching.",
+          "when_to_use": [
+            "WebSocket upgrades",
+            "HTTP/1.1 to HTTP/2 upgrades",
+            "Protocol negotiation"
+          ],
+          "example_response": {
+            "status": 101,
+            "message": "Switching Protocols",
+            "headers": {
+              "Upgrade": "websocket",
+              "Connection": "Upgrade"
+            }
+          },
+          "best_practice": "Use WebSocket upgrade via 101 for real-time, bidirectional communication instead of polling."
+        },
+        {
+          "id": "code_102",
+          "code": 102,
+          "title": "Processing",
+          "short_description": "Server is processing the request (WebDAV).",
+          "description": "An interim response used to inform the client that the server has accepted the complete request but has not yet completed it. Primarily used in WebDAV to prevent the client from timing out.",
+          "when_to_use": [
+            "Long-running WebDAV operations",
+            "Batch processing endpoints",
+            "File operations taking more than 20 seconds"
+          ],
+          "example_response": {
+            "status": 102,
+            "message": "Processing"
+          },
+          "best_practice": "Send 102 every 10-15 seconds for long operations to keep the connection alive."
+        },
+        {
+          "id": "code_103",
+          "code": 103,
+          "title": "Early Hints",
+          "short_description": "Returns preliminary headers before final response.",
+          "description": "Used to return some response headers before the final HTTP message. Allows the user agent to start preloading resources while the server is still preparing a response.",
+          "when_to_use": [
+            "Preloading CSS and JavaScript",
+            "Link preloading for performance",
+            "CDN optimization"
+          ],
+          "example_response": {
+            "status": 103,
+            "message": "Early Hints",
+            "headers": {
+              "Link": "</style.css>; rel=preload; as=style"
+            }
+          },
+          "best_practice": "Use 103 with Link headers to dramatically improve page load performance by preloading critical assets."
+        }
+      ]
+    },
+    {
+      "id": "cat_2xx",
+      "title": "2xx Success",
+      "color": "#2196F3",
+      "description": "Request was successfully received, understood, and accepted.",
+      "codes": [
+        {
+          "id": "code_200",
+          "code": 200,
+          "title": "OK",
+          "short_description": "Request succeeded. Standard response for successful requests.",
+          "description": "The standard success response. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain the result of the action.",
+          "when_to_use": [
+            "GET requests returning data",
+            "POST requests that create or update",
+            "Any successful synchronous operation"
+          ],
+          "example_response": {
+            "status": 200,
+            "message": "OK",
+            "data": {
+              "id": 1,
+              "name": "John Doe",
+              "email": "john@example.com"
+            }
+          },
+          "best_practice": "Always include the resource representation in a 200 response body. Return consistent response envelopes across your API."
+        },
+        {
+          "id": "code_201",
+          "code": 201,
+          "title": "Created",
+          "short_description": "Resource created successfully.",
+          "description": "The request has been fulfilled and has resulted in one or more new resources being created. The newly created resource can be referenced by the URI(s) returned in the entity of the response, with the most specific URI given by a Location header.",
+          "when_to_use": [
+            "POST requests that create a new resource",
+            "User registration",
+            "Creating database records"
+          ],
+          "example_response": {
+            "status": 201,
+            "message": "Created",
+            "data": {
+              "id": 42,
+              "name": "New Resource"
+            },
+            "location": "/api/resources/42"
+          },
+          "best_practice": "Always return the Location header pointing to the new resource, and include the created object in the response body."
+        },
+        {
+          "id": "code_202",
+          "code": 202,
+          "title": "Accepted",
+          "short_description": "Request accepted for processing, not yet completed.",
+          "description": "The request has been accepted for processing, but the processing has not been completed. The request might or might not be eventually acted upon, and may be disallowed when processing occurs.",
+          "when_to_use": [
+            "Asynchronous batch operations",
+            "Email sending queues",
+            "Background job submissions"
+          ],
+          "example_response": {
+            "status": 202,
+            "message": "Accepted",
+            "jobId": "job_xyz_123",
+            "statusUrl": "/api/jobs/job_xyz_123"
+          },
+          "best_practice": "Always return a job ID and a polling URL so the client can check the status of the asynchronous operation."
+        },
+        {
+          "id": "code_203",
+          "code": 203,
+          "title": "Non-Authoritative Information",
+          "short_description": "Response from a third-party or transformed proxy.",
+          "description": "The server is a transforming proxy that received a 200 OK from its origin but is returning a modified version of the origin's response.",
+          "when_to_use": [
+            "Proxy servers returning cached/modified versions",
+            "CDN-modified responses",
+            "Third-party data aggregators"
+          ],
+          "example_response": {
+            "status": 203,
+            "message": "Non-Authoritative Information"
+          },
+          "best_practice": "Include a Warning header to help clients understand the response was transformed."
+        },
+        {
+          "id": "code_204",
+          "code": 204,
+          "title": "No Content",
+          "short_description": "Request succeeded, no content to return.",
+          "description": "The server has successfully fulfilled the request and there is no additional content to send in the response payload body. Usually returned as a response to a DELETE or update operation.",
+          "when_to_use": [
+            "DELETE requests",
+            "PATCH/PUT updates that don't need a response body",
+            "Heartbeat/ping endpoints"
+          ],
+          "example_response": {
+            "status": 204,
+            "message": "No Content"
+          },
+          "best_practice": "Use 204 instead of 200 with an empty body for DELETE operations. Never include a body with a 204 response."
+        },
+        {
+          "id": "code_205",
+          "code": 205,
+          "title": "Reset Content",
+          "short_description": "Client should reset the document view.",
+          "description": "The server has fulfilled the request and desires that the user agent reset the document view, which caused the request to be sent, to its original state as received from the origin server.",
+          "when_to_use": [
+            "After submitting a form that should be cleared",
+            "Resetting a UI input field",
+            "Clearing a canvas or editor after save"
+          ],
+          "example_response": {
+            "status": 205,
+            "message": "Reset Content"
+          },
+          "best_practice": "Use 205 when you want the client to clear its form or input fields after a successful operation. Do not include a response body."
+        },
+        {
+          "id": "code_206",
+          "code": 206,
+          "title": "Partial Content",
+          "short_description": "Server is sending only part of the resource (range request).",
+          "description": "The server is delivering only part of the resource due to a Range header sent by the client. Used by HTTP clients to enable resuming of interrupted downloads, or to split a download into multiple streams.",
+          "when_to_use": [
+            "Video streaming",
+            "Large file downloads with resume support",
+            "Paginated binary content"
+          ],
+          "example_response": {
+            "status": 206,
+            "message": "Partial Content",
+            "headers": {
+              "Content-Range": "bytes 0-1023/146515",
+              "Content-Length": "1024"
+            }
+          },
+          "best_practice": "Always support Range requests for any endpoint serving large files or media to enable efficient streaming and resumable downloads."
+        },
+        {
+          "id": "code_207",
+          "code": 207,
+          "title": "Multi-Status",
+          "short_description": "Multiple status codes for multiple operations (WebDAV).",
+          "description": "Conveys information about multiple resources in situations where multiple status codes might be appropriate. This response is used in WebDAV to communicate results of multiple operations on multiple resources.",
+          "when_to_use": [
+            "WebDAV batch operations",
+            "Bulk API responses with mixed results",
+            "Batch create/update with partial success"
+          ],
+          "example_response": {
+            "status": 207,
+            "message": "Multi-Status",
+            "responses": [
+              {
+                "href": "/files/a.txt",
+                "status": 200
+              },
+              {
+                "href": "/files/b.txt",
+                "status": 403
+              }
+            ]
+          },
+          "best_practice": "Use 207 for batch APIs where each sub-operation can independently succeed or fail. Always include individual status codes per item."
+        },
+        {
+          "id": "code_208",
+          "code": 208,
+          "title": "Already Reported",
+          "short_description": "DAV bindings already enumerated in a previous reply.",
+          "description": "Used inside a DAV: propstat response element to avoid enumerating the internal members of multiple bindings to the same collection repeatedly. It means the resource has already been listed in a previous response.",
+          "when_to_use": [
+            "WebDAV PROPFIND with Depth header",
+            "Avoiding duplicate entries in multi-status responses",
+            "Circular reference detection in WebDAV collections"
+          ],
+          "example_response": {
+            "status": 208,
+            "message": "Already Reported"
+          },
+          "best_practice": "Only relevant in WebDAV. Ensure your WebDAV server correctly tracks already-reported bindings to avoid infinite loops."
+        },
+        {
+          "id": "code_226",
+          "code": 226,
+          "title": "IM Used",
+          "short_description": "Server fulfilled GET using instance manipulations.",
+          "description": "The server has fulfilled a GET request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance. Used for HTTP Delta encoding.",
+          "when_to_use": [
+            "HTTP delta encoding",
+            "Differential content responses",
+            "Bandwidth optimization scenarios"
+          ],
+          "example_response": {
+            "status": 226,
+            "message": "IM Used",
+            "headers": {
+              "IM": "feed",
+              "Delta-Base": "\"abc\""
+            }
+          },
+          "best_practice": "Only use 226 when you implement full HTTP Delta encoding (RFC 3229). Not widely supported by clients — prefer other bandwidth optimizations."
+        }
+      ]
+    },
+    {
+      "id": "cat_3xx",
+      "title": "3xx Redirection",
+      "color": "#FF9800",
+      "description": "Further action needs to be taken in order to complete the request.",
+      "codes": [
+        {
+          "id": "code_300",
+          "code": 300,
+          "title": "Multiple Choices",
+          "short_description": "Multiple options available for the requested resource.",
+          "description": "The request has more than one possible response. The user agent or user should choose one of them. There is no standardized way of choosing one of the responses, but HTML links to the possibilities are recommended.",
+          "when_to_use": [
+            "Content negotiation",
+            "Multiple file formats available",
+            "API versioning decisions"
+          ],
+          "example_response": {
+            "status": 300,
+            "message": "Multiple Choices",
+            "choices": [
+              {
+                "url": "/api/v1/data",
+                "format": "json"
+              },
+              {
+                "url": "/api/v1/data.xml",
+                "format": "xml"
+              }
+            ]
+          },
+          "best_practice": "Provide a clear list of alternatives with their content types. Prefer content negotiation via Accept headers over 300 responses."
+        },
+        {
+          "id": "code_301",
+          "code": 301,
+          "title": "Moved Permanently",
+          "short_description": "Resource permanently moved to a new URL.",
+          "description": "The URL of the requested resource has been changed permanently. The new URL is given in the response. Search engines update their links and browsers cache this redirect, so future requests go directly to the new URL.",
+          "when_to_use": [
+            "URL restructuring",
+            "Domain migration",
+            "API endpoint deprecation with migration"
+          ],
+          "example_response": {
+            "status": 301,
+            "message": "Moved Permanently",
+            "location": "/api/v2/users"
+          },
+          "best_practice": "Use 301 only when the move is truly permanent. After issuing a 301, the old URL should be kept handling redirects indefinitely."
+        },
+        {
+          "id": "code_302",
+          "code": 302,
+          "title": "Found",
+          "short_description": "Resource temporarily resides at a different URL.",
+          "description": "The target resource resides temporarily under a different URI. Since the redirection might be altered on occasion, the client ought to continue to use the effective request URI for future requests.",
+          "when_to_use": [
+            "Post/Redirect/Get pattern after form submission",
+            "Temporary maintenance redirects",
+            "A/B testing redirects"
+          ],
+          "example_response": {
+            "status": 302,
+            "message": "Found",
+            "location": "/maintenance"
+          },
+          "best_practice": "Use 302 for temporary redirects. For POST requests, use 303 See Other to redirect to a GET request after form submission."
+        },
+        {
+          "id": "code_303",
+          "code": 303,
+          "title": "See Other",
+          "short_description": "Redirect to another URI with a GET request.",
+          "description": "The server is redirecting the user agent to a different resource, indicated by a URI in the Location header, which is intended to provide an indirect response to the original request. The redirected request MUST use GET method.",
+          "when_to_use": [
+            "After a successful POST to redirect to a result page",
+            "Post-login redirect",
+            "After form submission to a confirmation page"
+          ],
+          "example_response": {
+            "status": 303,
+            "message": "See Other",
+            "location": "/orders/12345/confirmation"
+          },
+          "best_practice": "Always use 303 (not 302) after a POST form submission to implement the Post/Redirect/Get pattern and prevent duplicate submissions on refresh."
+        },
+        {
+          "id": "code_304",
+          "code": 304,
+          "title": "Not Modified",
+          "short_description": "Resource not modified since last request (cached version valid).",
+          "description": "Indicates that the resource has not been modified since the version specified by the request headers If-Modified-Since or If-None-Match. The client should continue to use the cached version of the response.",
+          "when_to_use": [
+            "Conditional GET requests",
+            "Browser caching validation",
+            "CDN cache optimization"
+          ],
+          "example_response": {
+            "status": 304,
+            "message": "Not Modified",
+            "headers": {
+              "ETag": "\"abc123\"",
+              "Cache-Control": "max-age=3600"
+            }
+          },
+          "best_practice": "Always implement ETags and Last-Modified headers. Proper cache validation via 304 can reduce bandwidth by 80%+."
+        },
+        {
+          "id": "code_305",
+          "code": 305,
+          "title": "Use Proxy",
+          "short_description": "Requested resource must be accessed through a proxy (deprecated).",
+          "description": "The requested resource must be accessed through the proxy given by the Location field. The Location field gives the URI of the proxy. This status code is deprecated due to security concerns.",
+          "when_to_use": [
+            "Legacy proxy enforcement (deprecated)",
+            "Historical HTTP/1.1 implementations"
+          ],
+          "example_response": {
+            "status": 305,
+            "message": "Use Proxy",
+            "location": "http://proxy.example.com"
+          },
+          "best_practice": "Do NOT use 305. It is deprecated and removed from HTTP/1.1 spec due to security concerns. Use network-level proxy configuration instead."
+        },
+        {
+          "id": "code_307",
+          "code": 307,
+          "title": "Temporary Redirect",
+          "short_description": "Resource temporarily at another URL; same HTTP method must be used.",
+          "description": "The target resource resides temporarily under a different URI and the user agent MUST NOT change the request method if it performs an automatic redirection to that URI. Unlike 302, 307 guarantees the method and body is preserved.",
+          "when_to_use": [
+            "Temporary server-side redirects where POST must be preserved",
+            "Load balancer redirects",
+            "Maintenance pages that must preserve POST data"
+          ],
+          "example_response": {
+            "status": 307,
+            "message": "Temporary Redirect",
+            "location": "/api/v1/users"
+          },
+          "best_practice": "Prefer 307 over 302 when you want to temporarily redirect but need to ensure the HTTP method (POST, PUT) is preserved."
+        },
+        {
+          "id": "code_308",
+          "code": 308,
+          "title": "Permanent Redirect",
+          "short_description": "Resource permanently moved; same HTTP method must be used.",
+          "description": "The target resource has been assigned a new permanent URI and future references to this resource ought to use one of the enclosed URIs. Like 307, it preserves the HTTP method and body.",
+          "when_to_use": [
+            "Permanent API endpoint URL changes",
+            "Domain migration preserving POST endpoints",
+            "REST API versioning migrations"
+          ],
+          "example_response": {
+            "status": 308,
+            "message": "Permanent Redirect",
+            "location": "/api/v2/users"
+          },
+          "best_practice": "Use 308 instead of 301 when you need clients to re-send the entire request (body and method) to the new URL permanently."
+        }
+      ]
+    },
+    {
+      "id": "cat_4xx",
+      "title": "4xx Client Errors",
+      "color": "#F44336",
+      "description": "The request contains bad syntax or cannot be fulfilled.",
+      "codes": [
+        {
+          "id": "code_400",
+          "code": 400,
+          "title": "Bad Request",
+          "short_description": "Server cannot process request due to client error.",
+          "description": "The server cannot or will not process the request due to something that is perceived to be a client error such as malformed request syntax, invalid request message framing, or deceptive request routing.",
+          "when_to_use": [
+            "Invalid JSON payload",
+            "Missing required fields",
+            "Validation failures",
+            "Malformed query parameters"
+          ],
+          "example_response": {
+            "status": 400,
+            "error": "Bad Request",
+            "message": "Validation failed",
+            "details": [
+              {
+                "field": "email",
+                "message": "Invalid email format"
+              },
+              {
+                "field": "age",
+                "message": "Must be a positive integer"
+              }
+            ]
+          },
+          "best_practice": "Always return detailed validation errors with the specific field names and error messages. Never return a generic 400 without explanation."
+        },
+        {
+          "id": "code_401",
+          "code": 401,
+          "title": "Unauthorized",
+          "short_description": "Authentication required or has failed.",
+          "description": "The client request has not been completed because it lacks valid authentication credentials for the requested resource. The server must send a WWW-Authenticate header with a challenge. Despite the name, this is about authentication, not authorization.",
+          "when_to_use": [
+            "Missing or invalid API tokens",
+            "Expired JWT tokens",
+            "Missing Authorization header",
+            "Invalid credentials"
+          ],
+          "example_response": {
+            "status": 401,
+            "error": "Unauthorized",
+            "message": "Invalid or expired authentication token"
+          },
+          "best_practice": "Return 401 for authentication failures, not 403. Always include the WWW-Authenticate header. Use short-lived tokens and refresh token patterns."
+        },
+        {
+          "id": "code_402",
+          "code": 402,
+          "title": "Payment Required",
+          "short_description": "Payment required to access this resource.",
+          "description": "Originally reserved for future use in digital payment systems. Now used by some APIs to indicate that the user's payment is required (subscription expired, credit limit reached, etc.).",
+          "when_to_use": [
+            "SaaS subscription expired",
+            "API quota exhausted and paid upgrade is needed",
+            "Freemium feature behind paywall"
+          ],
+          "example_response": {
+            "status": 402,
+            "error": "Payment Required",
+            "message": "Your subscription has expired. Upgrade to continue.",
+            "upgradeUrl": "https://example.com/billing"
+          },
+          "best_practice": "While non-standard, 402 is increasingly used for billing-related blocks. Always include an upgrade or payment URL in the response body."
+        },
+        {
+          "id": "code_403",
+          "code": 403,
+          "title": "Forbidden",
+          "short_description": "Server refuses to authorize the request.",
+          "description": "The server understood the request but refuses to authorize it. Unlike 401 Unauthorized, the client's identity is known but they don't have permission to access the resource. Re-authentication will make no difference.",
+          "when_to_use": [
+            "User is authenticated but lacks permissions",
+            "Role-based access control violations",
+            "IP-based access restrictions",
+            "Resource ownership violations"
+          ],
+          "example_response": {
+            "status": 403,
+            "error": "Forbidden",
+            "message": "You do not have permission to access this resource"
+          },
+          "best_practice": "Return 403 (not 401) when the user is authenticated but unauthorized. Consider returning 404 instead to not reveal the resource exists."
+        },
+        {
+          "id": "code_404",
+          "code": 404,
+          "title": "Not Found",
+          "short_description": "Requested resource could not be found.",
+          "description": "The server cannot find the requested resource. Links that lead to a 404 page are often called broken or dead links. A 404 status code only indicates that the resource is missing; it does not indicate whether the absence is temporary or permanent.",
+          "when_to_use": [
+            "Resource doesn't exist",
+            "Deleted resources",
+            "URL typos",
+            "Private resources (to hide existence)"
+          ],
+          "example_response": {
+            "status": 404,
+            "error": "Not Found",
+            "message": "User with ID 999 was not found"
+          },
+          "best_practice": "Implement proper 404 pages. Use 404 (not 403) to hide existence of private resources. Log 404s to catch broken links."
+        },
+        {
+          "id": "code_405",
+          "code": 405,
+          "title": "Method Not Allowed",
+          "short_description": "HTTP method is not supported for this resource.",
+          "description": "The request method is known by the server but is not supported by the target resource. The server MUST generate an Allow header field containing a list of the target resource's currently supported methods.",
+          "when_to_use": [
+            "POST to a read-only endpoint",
+            "DELETE on a non-deletable resource",
+            "GET on a write-only endpoint"
+          ],
+          "example_response": {
+            "status": 405,
+            "error": "Method Not Allowed",
+            "message": "GET is not allowed on this endpoint",
+            "allow": [
+              "POST",
+              "PUT"
+            ]
+          },
+          "best_practice": "Always include the Allow header listing supported methods. If your framework doesn't do this automatically, add it manually."
+        },
+        {
+          "id": "code_406",
+          "code": 406,
+          "title": "Not Acceptable",
+          "short_description": "Server cannot produce a response matching the Accept headers.",
+          "description": "The server cannot produce a response matching the list of acceptable values defined in the request's proactive content negotiation headers, and the server is unwilling to supply a default representation.",
+          "when_to_use": [
+            "Client requests XML but API only serves JSON",
+            "Unsupported content type negotiation",
+            "API format version mismatch"
+          ],
+          "example_response": {
+            "status": 406,
+            "error": "Not Acceptable",
+            "message": "Cannot produce response in application/xml",
+            "supportedTypes": [
+              "application/json"
+            ]
+          },
+          "best_practice": "Always document your API's supported content types. Return available formats in the error response."
+        },
+        {
+          "id": "code_407",
+          "code": 407,
+          "title": "Proxy Authentication Required",
+          "short_description": "Client must authenticate itself with the proxy.",
+          "description": "The client must first authenticate itself with the proxy. The proxy must return a Proxy-Authenticate header containing a challenge applicable to the requested resource.",
+          "when_to_use": [
+            "Corporate proxy requiring login",
+            "Forward proxy authentication",
+            "Network gateway authentication"
+          ],
+          "example_response": {
+            "status": 407,
+            "error": "Proxy Authentication Required",
+            "message": "Please authenticate with the corporate proxy",
+            "headers": {
+              "Proxy-Authenticate": "Basic realm=\"Corporate Proxy\""
+            }
+          },
+          "best_practice": "Use proper proxy authentication. For modern architectures, avoid placing auth proxies in front of APIs; use API Gateway auth directly."
+        },
+        {
+          "id": "code_408",
+          "code": 408,
+          "title": "Request Timeout",
+          "short_description": "Server timed out waiting for the request.",
+          "description": "The server did not receive a complete request message within the time it was prepared to wait. The client may repeat the request without modifications at any later time.",
+          "when_to_use": [
+            "Client connection is too slow",
+            "Network interruptions",
+            "Client never sent the request body"
+          ],
+          "example_response": {
+            "status": 408,
+            "error": "Request Timeout",
+            "message": "The server closed the connection after waiting 30 seconds"
+          },
+          "best_practice": "Configure appropriate server read timeouts. Return 408 to free up server resources. The client should implement retry logic with exponential backoff."
+        },
+        {
+          "id": "code_409",
+          "code": 409,
+          "title": "Conflict",
+          "short_description": "Request conflicts with the current state of the resource.",
+          "description": "The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.",
+          "when_to_use": [
+            "Duplicate resource creation (unique constraint violations)",
+            "Concurrent modification conflicts",
+            "Version mismatch in optimistic locking",
+            "Email already registered"
+          ],
+          "example_response": {
+            "status": 409,
+            "error": "Conflict",
+            "message": "A user with this email already exists",
+            "field": "email"
+          },
+          "best_practice": "Use optimistic locking with ETag/version numbers to detect conflicts. Return the conflicting resource's current state so the client can merge changes."
+        },
+        {
+          "id": "code_410",
+          "code": 410,
+          "title": "Gone",
+          "short_description": "Resource permanently deleted and will not return.",
+          "description": "The target resource is no longer available at the origin server and that this condition is likely to be permanent. If you don't know whether the condition is temporary or permanent, use 404 instead.",
+          "when_to_use": [
+            "Permanently deleted resources",
+            "Deprecated API endpoints",
+            "Content removed for policy reasons"
+          ],
+          "example_response": {
+            "status": 410,
+            "error": "Gone",
+            "message": "This resource has been permanently deleted"
+          },
+          "best_practice": "Use 410 over 404 for intentionally deleted resources. Search engines will de-index 410 pages faster than 404 pages."
+        },
+        {
+          "id": "code_411",
+          "code": 411,
+          "title": "Length Required",
+          "short_description": "Content-Length header is required but not provided.",
+          "description": "The server refuses to accept the request without a defined Content-Length. The client MAY repeat the request if it adds a valid Content-Length header field containing the length of the message body in the request message.",
+          "when_to_use": [
+            "POST requests without Content-Length",
+            "Custom protocol validation",
+            "Streaming requests to servers requiring length"
+          ],
+          "example_response": {
+            "status": 411,
+            "error": "Length Required",
+            "message": "Content-Length header is required"
+          },
+          "best_practice": "Configure your server to require Content-Length for POST requests. Most HTTP clients add this automatically."
+        },
+        {
+          "id": "code_412",
+          "code": 412,
+          "title": "Precondition Failed",
+          "short_description": "Precondition specified in request headers evaluated to false.",
+          "description": "One or more conditions given in the request header fields evaluated to false when tested on the server. This response code allows the client to place preconditions on the current resource state to prevent the request from being applied if the resource has been modified.",
+          "when_to_use": [
+            "Conditional PUT/DELETE requests",
+            "If-Match header precondition failed",
+            "Optimistic concurrency control",
+            "Preventing lost updates"
+          ],
+          "example_response": {
+            "status": 412,
+            "error": "Precondition Failed",
+            "message": "ETag mismatch. Resource was modified by another client.",
+            "currentETag": "\"xyz789\""
+          },
+          "best_practice": "Use If-Match with ETags for safe concurrent updates. Always return the current ETag in the 412 response so the client can re-fetch and merge."
+        },
+        {
+          "id": "code_413",
+          "code": 413,
+          "title": "Content Too Large",
+          "short_description": "Request body exceeds server's size limit.",
+          "description": "The server is refusing to process a request because the request payload is larger than the server is willing or able to process. The server may close the connection to prevent the client from continuing the request.",
+          "when_to_use": [
+            "File upload exceeding size limit",
+            "JSON payload too large",
+            "Batch operations with too many items"
+          ],
+          "example_response": {
+            "status": 413,
+            "error": "Content Too Large",
+            "message": "Maximum request size is 10MB",
+            "maxSizeBytes": 10485760
+          },
+          "best_practice": "Implement chunked uploads for large files. Always specify and document your maximum request size. Return the limit in the error response."
+        },
+        {
+          "id": "code_414",
+          "code": 414,
+          "title": "URI Too Long",
+          "short_description": "Request URI is longer than the server can process.",
+          "description": "The server is refusing to service the request because the request-target is longer than the server is willing to interpret. This rare condition is only likely to occur when a client has improperly converted a POST request to a GET request with long query information.",
+          "when_to_use": [
+            "Extremely long query strings",
+            "Improperly encoded large data in URL",
+            "GET requests with too many parameters"
+          ],
+          "example_response": {
+            "status": 414,
+            "error": "URI Too Long",
+            "message": "Request URI exceeds the maximum allowed length of 8192 characters"
+          },
+          "best_practice": "Move large data from query strings to the request body using POST. Keep URLs under 2000 characters for maximum browser/server compatibility."
+        },
+        {
+          "id": "code_415",
+          "code": 415,
+          "title": "Unsupported Media Type",
+          "short_description": "Request's media type is not supported by the server.",
+          "description": "The origin server is refusing to service the request because the payload is in a format not supported by this method on the target resource. The format problem might be due to the Content-Type or Content-Encoding.",
+          "when_to_use": [
+            "Sending XML to a JSON-only API",
+            "Wrong file type in upload",
+            "Missing Content-Type header"
+          ],
+          "example_response": {
+            "status": 415,
+            "error": "Unsupported Media Type",
+            "message": "Only application/json is supported",
+            "received": "text/xml"
+          },
+          "best_practice": "Clearly document accepted content types. Return the list of supported types in the error response."
+        },
+        {
+          "id": "code_416",
+          "code": 416,
+          "title": "Range Not Satisfiable",
+          "short_description": "Server cannot serve the requested byte range.",
+          "description": "The server cannot serve the requested ranges. The most likely reason is that the document doesn't contain such ranges, or that the Range header value, though syntactically correct, doesn't make sense.",
+          "when_to_use": [
+            "Range request beyond file size",
+            "Malformed Range header value",
+            "Requesting byte ranges that don't exist"
+          ],
+          "example_response": {
+            "status": 416,
+            "error": "Range Not Satisfiable",
+            "message": "The requested range is not satisfiable",
+            "headers": {
+              "Content-Range": "bytes */1024"
+            }
+          },
+          "best_practice": "Always return a Content-Range header with the actual resource size in a 416 response so the client can adjust its range request."
+        },
+        {
+          "id": "code_417",
+          "code": 417,
+          "title": "Expectation Failed",
+          "short_description": "Server cannot meet the requirement in the Expect header.",
+          "description": "The expectation given in the Expect request header field could not be met by at least one inbound server. This is often triggered when the client sends Expect: 100-continue but the server cannot fulfill the expectation.",
+          "when_to_use": [
+            "Server does not support 100-continue",
+            "Expect header value not understood",
+            "Pre-flight check failed"
+          ],
+          "example_response": {
+            "status": 417,
+            "error": "Expectation Failed",
+            "message": "Server does not support 100-continue"
+          },
+          "best_practice": "If you control both client and server, disable Expect headers for small requests. Only use 100-continue for genuinely large request bodies."
+        },
+        {
+          "id": "code_418",
+          "code": 418,
+          "title": "I'm a Teapot",
+          "short_description": "Server refuses to brew coffee with a teapot (April Fools).",
+          "description": "The HTTP 418 I'm a Teapot client error response code indicates that the server refuses to brew coffee because it is, permanently, a teapot. This code was defined as an April Fools' joke in RFC 2324 (Hyper Text Coffee Pot Control Protocol).",
+          "when_to_use": [
+            "Easter eggs in APIs",
+            "Fun error pages",
+            "Joke responses to invalid requests",
+            "Bot detection tricks"
+          ],
+          "example_response": {
+            "status": 418,
+            "error": "I'm a teapot",
+            "message": "I refuse to brew coffee. I am a teapot."
+          },
+          "best_practice": "Don't use in production. Some developers use 418 for bot detection, but this is non-standard. For joke endpoints it's fine."
+        },
+        {
+          "id": "code_421",
+          "code": 421,
+          "title": "Misdirected Request",
+          "short_description": "Request directed at a server that cannot produce a response.",
+          "description": "The request was directed at a server that is not able to produce a response. This can be sent by a server that is not configured to produce responses for the combination of scheme and authority included in the request URI.",
+          "when_to_use": [
+            "HTTP/2 connection reuse with wrong server",
+            "SNI mismatch on shared hosting",
+            "Request routed to wrong virtual host"
+          ],
+          "example_response": {
+            "status": 421,
+            "error": "Misdirected Request",
+            "message": "This server cannot produce a response for the requested host"
+          },
+          "best_practice": "Ensure your HTTP/2 connection pooling respects server certificates. Implement proper SNI handling in reverse proxies."
+        },
+        {
+          "id": "code_422",
+          "code": 422,
+          "title": "Unprocessable Entity",
+          "short_description": "Request well-formed but semantically incorrect.",
+          "description": "The server understands the content type of the request entity and the syntax of the request entity is correct, but it was unable to process the contained instructions. Used for semantic validation errors where the request is syntactically valid.",
+          "when_to_use": [
+            "Business rule violations",
+            "Semantic validation failures",
+            "Valid JSON with invalid business logic",
+            "Start date after end date"
+          ],
+          "example_response": {
+            "status": 422,
+            "error": "Unprocessable Entity",
+            "message": "Validation failed",
+            "errors": [
+              {
+                "field": "startDate",
+                "message": "Start date cannot be in the past"
+              }
+            ]
+          },
+          "best_practice": "Use 422 for semantic errors (business logic), not 400 (syntax errors). Provide field-level errors for form validation."
+        },
+        {
+          "id": "code_423",
+          "code": 423,
+          "title": "Locked",
+          "short_description": "Resource being accessed is locked (WebDAV).",
+          "description": "The source or destination resource of a method is locked. This response should contain an appropriate precondition or postcondition code, such as lock-token-submitted or no-conflicting-lock.",
+          "when_to_use": [
+            "WebDAV resource locked by another client",
+            "Pessimistic locking scenarios",
+            "Preventing concurrent edits on a document"
+          ],
+          "example_response": {
+            "status": 423,
+            "error": "Locked",
+            "message": "The resource is currently locked by another user",
+            "lockedBy": "user@example.com",
+            "until": "2024-01-15T10:00:00Z"
+          },
+          "best_practice": "Always include lock expiry time and the lock holder identity in your response. Implement lock timeouts to prevent deadlocks."
+        },
+        {
+          "id": "code_424",
+          "code": 424,
+          "title": "Failed Dependency",
+          "short_description": "Request failed due to a failure of a previous request (WebDAV).",
+          "description": "The method could not be performed on the resource because the requested action depended on another action and that action failed. For example, if a command in a PROPPATCH method fails, then, at minimum, the rest of the commands will also fail with 424.",
+          "when_to_use": [
+            "WebDAV batch operation with failed dependency",
+            "API with prerequisite steps",
+            "Transaction rollback due to dependent failure"
+          ],
+          "example_response": {
+            "status": 424,
+            "error": "Failed Dependency",
+            "message": "Resource creation failed because the parent resource does not exist"
+          },
+          "best_practice": "In batch APIs, clearly indicate which dependency failed and what needs to be resolved first."
+        },
+        {
+          "id": "code_425",
+          "code": 425,
+          "title": "Too Early",
+          "short_description": "Server is unwilling to process a request that might be replayed.",
+          "description": "Indicates that the server is unwilling to risk processing a request that might be replayed. This is used to prevent replay attacks with early data in TLS 1.3 handshakes.",
+          "when_to_use": [
+            "TLS 1.3 early data (0-RTT) rejection",
+            "Replay attack prevention",
+            "High-security endpoints that reject 0-RTT"
+          ],
+          "example_response": {
+            "status": 425,
+            "error": "Too Early",
+            "message": "Server will not process 0-RTT early data"
+          },
+          "best_practice": "Return 425 for non-idempotent requests sent as TLS 1.3 early data. Safe (GET, HEAD) requests can be allowed; unsafe (POST, DELETE) should be rejected."
+        },
+        {
+          "id": "code_426",
+          "code": 426,
+          "title": "Upgrade Required",
+          "short_description": "Client must switch to a different protocol.",
+          "description": "The server refuses to perform the request using the current protocol but will be willing to do so after the client upgrades to a different protocol. The server sends an Upgrade header to indicate the required protocol(s).",
+          "when_to_use": [
+            "Requiring HTTPS upgrade",
+            "WebSocket upgrade required",
+            "Enforcing a newer protocol version"
+          ],
+          "example_response": {
+            "status": 426,
+            "error": "Upgrade Required",
+            "message": "Please upgrade to HTTPS",
+            "headers": {
+              "Upgrade": "TLS/1.3",
+              "Connection": "Upgrade"
+            }
+          },
+          "best_practice": "Always redirect HTTP to HTTPS at the infrastructure level. Use HSTS headers to prevent future plain-HTTP requests."
+        },
+        {
+          "id": "code_428",
+          "code": 428,
+          "title": "Precondition Required",
+          "short_description": "Server requires the request to be conditional.",
+          "description": "The origin server requires the request to be conditional. This response is intended to prevent the 'lost update' problem, where a client GETs a resource's state, modifies it, and PUTs it back to the server, when meanwhile a third party has modified the state on the server.",
+          "when_to_use": [
+            "Forcing ETags on update endpoints",
+            "Preventing lost updates",
+            "Mandatory optimistic concurrency on PUT/PATCH/DELETE"
+          ],
+          "example_response": {
+            "status": 428,
+            "error": "Precondition Required",
+            "message": "An If-Match or If-Unmodified-Since header is required for this request"
+          },
+          "best_practice": "Return 428 on PUT/PATCH/DELETE endpoints to enforce clients to always include an If-Match header. Prevent accidental overwrites in concurrent scenarios."
+        },
+        {
+          "id": "code_429",
+          "code": 429,
+          "title": "Too Many Requests",
+          "short_description": "Client has sent too many requests (rate limiting).",
+          "description": "The user has sent too many requests in a given amount of time (rate limiting). The response should include details explaining the condition and may include a Retry-After header indicating how long to wait.",
+          "when_to_use": [
+            "Rate limiting exceeded",
+            "API quota exhausted",
+            "DDoS protection",
+            "Throttling per user/IP"
+          ],
+          "example_response": {
+            "status": 429,
+            "error": "Too Many Requests",
+            "message": "Rate limit exceeded. Max 100 requests per minute.",
+            "retryAfter": 60
+          },
+          "best_practice": "Always include Retry-After header. Use token bucket algorithms. Communicate rate limits via X-RateLimit headers on every response."
+        },
+        {
+          "id": "code_431",
+          "code": 431,
+          "title": "Request Header Fields Too Large",
+          "short_description": "Request headers are too large for server to process.",
+          "description": "The server is unwilling to process the request because its header fields are too large. The request may be resubmitted after reducing the size of the request header fields. It can be used both to indicate that the overall header size, or a specific header field, is too large.",
+          "when_to_use": [
+            "Too many or too large cookies",
+            "Extremely large Authorization header",
+            "Too many custom headers"
+          ],
+          "example_response": {
+            "status": 431,
+            "error": "Request Header Fields Too Large",
+            "message": "Request headers exceed the maximum allowed size of 8KB"
+          },
+          "best_practice": "Keep cookies and headers small. Use token references (IDs) instead of storing large data in cookies. Reduce custom header count."
+        },
+        {
+          "id": "code_451",
+          "code": 451,
+          "title": "Unavailable For Legal Reasons",
+          "short_description": "Resource unavailable due to legal demands.",
+          "description": "The server is denying access to the resource as a consequence of a legal demand. The server in question might not be an origin server. This status code is named after the Ray Bradbury novel Fahrenheit 451.",
+          "when_to_use": [
+            "DMCA takedown",
+            "Government-mandated content blocking",
+            "GDPR right-to-erasure requests",
+            "Court order compliance"
+          ],
+          "example_response": {
+            "status": 451,
+            "error": "Unavailable For Legal Reasons",
+            "message": "This content has been removed following a DMCA takedown notice",
+            "legalInfo": "https://example.com/legal/dmca"
+          },
+          "best_practice": "Include a link to the legal notice or court order where permitted. Be transparent about what authority issued the demand when legally allowed."
+        }
+      ]
+    },
+    {
+      "id": "cat_5xx",
+      "title": "5xx Server Errors",
+      "color": "#B71C1C",
+      "description": "The server failed to fulfil a valid request.",
+      "codes": [
+        {
+          "id": "code_500",
+          "code": 500,
+          "title": "Internal Server Error",
+          "short_description": "Unexpected server error occurred.",
+          "description": "The server encountered an unexpected condition that prevented it from fulfilling the request. This is a generic error message when no more specific message is suitable. The server should minimize the information it reveals to the client.",
+          "when_to_use": [
+            "Unhandled exceptions",
+            "Null pointer exceptions",
+            "Database query failures",
+            "Unexpected business logic errors"
+          ],
+          "example_response": {
+            "status": 500,
+            "error": "Internal Server Error",
+            "message": "An unexpected error occurred",
+            "requestId": "req_abc123"
+          },
+          "best_practice": "Never expose stack traces or internal details to clients. Log everything server-side with a correlation ID. Return that ID so users can report issues."
+        },
+        {
+          "id": "code_501",
+          "code": 501,
+          "title": "Not Implemented",
+          "short_description": "Server does not support the requested functionality.",
+          "description": "The server does not support the functionality required to fulfill the request. This is the appropriate response when the server does not recognize the request method and is not capable of supporting it for any resource.",
+          "when_to_use": [
+            "Unimplemented HTTP methods",
+            "Placeholder endpoints during development",
+            "Feature not yet available in this API version"
+          ],
+          "example_response": {
+            "status": 501,
+            "error": "Not Implemented",
+            "message": "This feature is not yet implemented"
+          },
+          "best_practice": "Use 501 for features on the roadmap but not yet implemented. Return an estimated release date if possible. Avoid 501 in production APIs."
+        },
+        {
+          "id": "code_502",
+          "code": 502,
+          "title": "Bad Gateway",
+          "short_description": "Upstream server returned an invalid response.",
+          "description": "The server, while acting as a gateway or proxy, received an invalid response from an upstream server it accessed when trying to fulfill the request. Common in microservices architectures when a downstream service fails.",
+          "when_to_use": [
+            "Upstream microservice is down",
+            "Load balancer can't reach backend",
+            "Proxy receiving garbage response",
+            "Database connection refused"
+          ],
+          "example_response": {
+            "status": 502,
+            "error": "Bad Gateway",
+            "message": "Failed to connect to upstream service",
+            "service": "payment-service"
+          },
+          "best_practice": "Include which upstream service failed. Implement circuit breakers. Use health checks to remove unhealthy nodes from the pool automatically."
+        },
+        {
+          "id": "code_503",
+          "code": 503,
+          "title": "Service Unavailable",
+          "short_description": "Server temporarily unable to handle the request.",
+          "description": "The server is not ready to handle the request. Common causes are a server that is down for maintenance or that is overloaded. A Retry-After header should be sent to indicate when the service is expected to be available again.",
+          "when_to_use": [
+            "Planned maintenance windows",
+            "Server overload scenarios",
+            "Graceful shutdown",
+            "Circuit breaker is open"
+          ],
+          "example_response": {
+            "status": 503,
+            "error": "Service Unavailable",
+            "message": "Service is under maintenance",
+            "retryAfter": "2024-01-15T10:00:00Z"
+          },
+          "best_practice": "Return Retry-After with an RFC 7231 date. Serve 503 from a separate health check endpoint. Use circuit breakers to automatically serve 503 when downstream failures spike."
+        },
+        {
+          "id": "code_504",
+          "code": 504,
+          "title": "Gateway Timeout",
+          "short_description": "Upstream server did not respond in time.",
+          "description": "The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access to complete the request. This is different from 408 Request Timeout, which is about the client timing out.",
+          "when_to_use": [
+            "Downstream service exceeds timeout threshold",
+            "Slow database queries",
+            "External API timeouts",
+            "Microservice chain timeout"
+          ],
+          "example_response": {
+            "status": 504,
+            "error": "Gateway Timeout",
+            "message": "Upstream service did not respond within 30 seconds",
+            "service": "inventory-service"
+          },
+          "best_practice": "Set aggressive timeouts on all downstream calls. Use async patterns for long-running operations. Never wait indefinitely for any external service."
+        },
+        {
+          "id": "code_505",
+          "code": 505,
+          "title": "HTTP Version Not Supported",
+          "short_description": "HTTP version used in request is not supported.",
+          "description": "The server does not support or refuses to support the major version of HTTP that was used in the request message. The server is indicating that it is unable or unwilling to complete the request using the same major version as the client.",
+          "when_to_use": [
+            "Client using obsolete HTTP version",
+            "Server enforcing minimum protocol version",
+            "Security policy rejecting old HTTP versions"
+          ],
+          "example_response": {
+            "status": 505,
+            "error": "HTTP Version Not Supported",
+            "message": "HTTP/1.0 is not supported. Please use HTTP/1.1 or HTTP/2."
+          },
+          "best_practice": "Enforce HTTP/1.1 minimum in modern APIs. Prefer HTTP/2 for performance. Never support HTTP/1.0 in new APIs due to security limitations."
+        },
+        {
+          "id": "code_506",
+          "code": 506,
+          "title": "Variant Also Negotiates",
+          "short_description": "Server has a configuration error in content negotiation.",
+          "description": "The server has an internal configuration error: the chosen variant resource is configured to engage in transparent content negotiation itself, and is therefore not a proper endpoint in the negotiation process.",
+          "when_to_use": [
+            "Misconfigured content negotiation",
+            "Server configuration errors",
+            "Transparent content negotiation loops"
+          ],
+          "example_response": {
+            "status": 506,
+            "error": "Variant Also Negotiates",
+            "message": "Server configuration error in content negotiation"
+          },
+          "best_practice": "This indicates a server misconfiguration. Fix the content negotiation configuration so the variant resource does not itself negotiate."
+        },
+        {
+          "id": "code_507",
+          "code": 507,
+          "title": "Insufficient Storage",
+          "short_description": "Server cannot store the representation needed (WebDAV).",
+          "description": "The method could not be performed on the resource because the server is unable to store the representation needed to successfully complete the request. This condition is considered to be temporary.",
+          "when_to_use": [
+            "Disk full on server",
+            "Storage quota exceeded",
+            "Database storage limit reached",
+            "WebDAV operations on full disk"
+          ],
+          "example_response": {
+            "status": 507,
+            "error": "Insufficient Storage",
+            "message": "Storage quota exceeded",
+            "quota": {
+              "used": "10GB",
+              "limit": "10GB"
+            }
+          },
+          "best_practice": "Monitor disk usage and alert before hitting limits. Implement storage quotas per user or tenant. Return current and max storage in the response."
+        },
+        {
+          "id": "code_508",
+          "code": 508,
+          "title": "Loop Detected",
+          "short_description": "Infinite loop detected while processing request (WebDAV).",
+          "description": "The server terminated an operation because it encountered an infinite loop while processing a request with Depth: infinity. This status indicates that the entire operation failed.",
+          "when_to_use": [
+            "WebDAV COPY/MOVE operations with circular references",
+            "Proxy chains creating loops",
+            "Misconfigured recursive operations"
+          ],
+          "example_response": {
+            "status": 508,
+            "error": "Loop Detected",
+            "message": "Circular reference detected in the directory structure"
+          },
+          "best_practice": "Track visited resources with a set during recursive operations. Set a maximum recursion depth to prevent stack overflows."
+        },
+        {
+          "id": "code_510",
+          "code": 510,
+          "title": "Not Extended",
+          "short_description": "Further extensions to the request are required.",
+          "description": "The policy for accessing the resource has not been met in the request. The server should send back all the information necessary for the client to issue an extended request. This is used for the HTTP Extension Framework.",
+          "when_to_use": [
+            "HTTP Extension Framework requirements",
+            "Required extension headers not sent",
+            "Policy-based access control via extensions"
+          ],
+          "example_response": {
+            "status": 510,
+            "error": "Not Extended",
+            "message": "The mandatory extension is required for this request"
+          },
+          "best_practice": "Rarely used in modern APIs. Prefer explicit versioning or feature negotiation headers over the HTTP Extension Framework."
+        },
+        {
+          "id": "code_511",
+          "code": 511,
+          "title": "Network Authentication Required",
+          "short_description": "Client must authenticate to gain network access.",
+          "description": "The 511 status code indicates that the client needs to authenticate to gain network access. The response SHOULD contain a link to a resource that allows the user to submit credentials (e.g., a captive portal login page).",
+          "when_to_use": [
+            "Captive portal on public WiFi",
+            "Hotel/airport WiFi login required",
+            "Network-level authentication gates"
+          ],
+          "example_response": {
+            "status": 511,
+            "error": "Network Authentication Required",
+            "message": "You must sign in to access the network",
+            "loginUrl": "https://wifi.example.com/login"
+          },
+          "best_practice": "Include the login page URL in the response. This code is intended for network infrastructure (captive portals), not application-level auth."
+        },
+        {
+          "id": "code_520",
+          "code": 520,
+          "title": "Web Server Returns an Unknown Error",
+          "short_description": "Origin server returned an unexpected response (Cloudflare).",
+          "description": "The 520 error is used as a catch-all response when the origin server returns something unexpected or an empty, unmapped, or not supported response to Cloudflare. This is a Cloudflare-specific status code.",
+          "when_to_use": [
+            "Cloudflare cannot interpret origin response",
+            "Origin crashes during response",
+            "Empty or malformed response from origin"
+          ],
+          "example_response": {
+            "status": 520,
+            "error": "Web Server Returns an Unknown Error",
+            "message": "The origin server returned an unknown error",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Check your origin server logs. The origin is returning an empty or unexpected response. Common culprit: application crash or missing response handlers."
+        },
+        {
+          "id": "code_521",
+          "code": 521,
+          "title": "Web Server Is Down",
+          "short_description": "Origin server refused the connection (Cloudflare).",
+          "description": "The origin server has refused the connection from Cloudflare. This Cloudflare-specific error occurs when the origin web server is offline or actively refusing connections from Cloudflare's IP ranges.",
+          "when_to_use": [
+            "Origin server crashed",
+            "Origin firewall blocking Cloudflare IPs",
+            "Origin web server process is stopped"
+          ],
+          "example_response": {
+            "status": 521,
+            "error": "Web Server Is Down",
+            "message": "Cloudflare cannot connect to the origin server",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Ensure your origin server allows connections from all Cloudflare IP ranges. Check server process status and firewall rules."
+        },
+        {
+          "id": "code_522",
+          "code": 522,
+          "title": "Connection Timed Out",
+          "short_description": "Cloudflare timed out waiting for the origin server.",
+          "description": "Cloudflare was able to complete a TCP connection to the origin server, but the origin did not reply with an HTTP response before the connection timed out. This is a Cloudflare-specific status code.",
+          "when_to_use": [
+            "Origin server overloaded",
+            "Long-running request exceeds Cloudflare timeout",
+            "Network congestion between Cloudflare and origin"
+          ],
+          "example_response": {
+            "status": 522,
+            "error": "Connection Timed Out",
+            "message": "The connection to the origin server timed out",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Optimize slow origin responses. Use Cloudflare's timeout settings. For long operations, return 202 Accepted and process asynchronously."
+        },
+        {
+          "id": "code_523",
+          "code": 523,
+          "title": "Origin Is Unreachable",
+          "short_description": "Cloudflare cannot reach the origin server (DNS failure).",
+          "description": "Cloudflare could not reach the origin server. This is typically a DNS resolution failure or the origin server has an incorrect IP address configured in Cloudflare's DNS settings.",
+          "when_to_use": [
+            "DNS configuration error",
+            "Origin IP changed but DNS not updated",
+            "Origin server removed without updating Cloudflare"
+          ],
+          "example_response": {
+            "status": 523,
+            "error": "Origin Is Unreachable",
+            "message": "Cloudflare cannot reach the origin server",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Verify your DNS settings in Cloudflare. Ensure the origin IP is correct and reachable. Check for DNS propagation issues after IP changes."
+        },
+        {
+          "id": "code_524",
+          "code": 524,
+          "title": "A Timeout Occurred",
+          "short_description": "Cloudflare established a connection but origin timed out.",
+          "description": "Cloudflare was able to connect to the origin server but the connection timed out before the origin server sent a complete response. Different from 522, as the TCP connection was established.",
+          "when_to_use": [
+            "Origin took too long to respond",
+            "Database query ran longer than 100 seconds",
+            "PHP/Node process timed out on origin"
+          ],
+          "example_response": {
+            "status": 524,
+            "error": "A Timeout Occurred",
+            "message": "The origin server timed out after establishing a connection",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "For operations exceeding 100 seconds, use streaming responses or return 202 with a polling endpoint. Optimize long-running queries and background jobs."
+        },
+        {
+          "id": "code_525",
+          "code": 525,
+          "title": "SSL Handshake Failed",
+          "short_description": "Cloudflare and origin could not complete an SSL handshake.",
+          "description": "Cloudflare could not negotiate a SSL/TLS handshake with the origin server. This typically happens when the origin server's SSL certificate is misconfigured or incompatible with Cloudflare's SSL modes.",
+          "when_to_use": [
+            "Origin SSL certificate expired",
+            "TLS version mismatch",
+            "Self-signed cert without Cloudflare Full SSL mode"
+          ],
+          "example_response": {
+            "status": 525,
+            "error": "SSL Handshake Failed",
+            "message": "Cloudflare cannot complete the SSL handshake with the origin",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Ensure your origin server has a valid SSL certificate. For Cloudflare Full (strict) mode, use a certificate signed by a trusted CA. Keep TLS version at 1.2+."
+        },
+        {
+          "id": "code_526",
+          "code": 526,
+          "title": "Invalid SSL Certificate",
+          "short_description": "Cloudflare could not validate the origin SSL certificate.",
+          "description": "Cloudflare could not validate the SSL certificate on the origin web server. This occurs specifically in 'Full (Strict)' SSL mode when the origin certificate is self-signed, expired, or otherwise untrusted.",
+          "when_to_use": [
+            "Self-signed certificate on origin in Full Strict mode",
+            "Expired origin SSL certificate",
+            "Certificate chain incomplete on origin"
+          ],
+          "example_response": {
+            "status": 526,
+            "error": "Invalid SSL Certificate",
+            "message": "The origin's SSL certificate could not be validated",
+            "provider": "Cloudflare"
+          },
+          "best_practice": "Install a valid SSL certificate from a recognized CA on your origin. Use Cloudflare's Origin Certificate for free automatic certificate management."
+        },
+        {
+          "id": "code_444",
+          "code": 444,
+          "title": "No Response",
+          "short_description": "Server returns no information and closes the connection (Nginx).",
+          "description": "A non-standard status code used by Nginx to instruct the server to return no information to the client and close the connection immediately. Often used to deter malicious or bot traffic by refusing to serve a response.",
+          "when_to_use": [
+            "Blocking known bad IPs or bots",
+            "Silently rejecting malicious requests",
+            "DDoS mitigation at Nginx level"
+          ],
+          "example_response": {
+            "status": 444,
+            "error": "No Response",
+            "message": "Connection closed without response",
+            "provider": "Nginx"
+          },
+          "best_practice": "Use 444 in Nginx at the server block level to silently drop connections from known bad actors. More resource-efficient than 403 since no response is sent."
+        },
+        {
+          "id": "code_499",
+          "code": 499,
+          "title": "Client Closed Request",
+          "short_description": "Client closed the connection before server could respond (Nginx).",
+          "description": "A non-standard status code introduced by Nginx for the case when the client closes the connection while Nginx was still processing the request. Useful for logging and monitoring request abandonment.",
+          "when_to_use": [
+            "Client cancelled a slow request",
+            "Network disconnect mid-request",
+            "User navigated away before response"
+          ],
+          "example_response": {
+            "status": 499,
+            "error": "Client Closed Request",
+            "message": "The client disconnected before the server could complete the response",
+            "provider": "Nginx"
+          },
+          "best_practice": "Monitor 499 rates in your logs. High 499 rates indicate slow responses. Implement streaming, faster APIs, or request cancellation handling on the server."
+        }
+      ]
+    }
+  ]
+}

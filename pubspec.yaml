@@ -1,0 +1,35 @@
+name: HTTP_Guide
+description: HTTP Status Code Guide – Developer Reference. A fully offline, production-ready developer utility app.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  hive_flutter: ^1.1.0
+  share_plus: ^10.0.2
+  flutter_svg: ^2.0.10+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.8
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/
+    - assets/images/
+  fonts: []
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "status_code_icon.jpeg"
